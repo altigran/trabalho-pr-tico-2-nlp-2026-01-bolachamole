@@ -1,0 +1,27 @@
+# Configuração A de fine-tuning (LoRA/QLoRA) — Fase 3
+# Edite os valores. As DUAS configs (A e B) devem diferir em pelo menos um
+# hiperparâmetro de treino (ex.: learning_rate ou num_train_epochs).
+
+seed: 42
+
+model:
+  base_model: "Qwen/Qwen2.5-3B-Instruct"   # documente o checkpoint EXATO
+  load_in_4bit: true                         # QLoRA (recomendado em GPU com pouca VRAM)
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: ["q_proj", "v_proj"]       # ajuste conforme a arquitetura
+  bias: "none"
+  task_type: "CAUSAL_LM"
+
+train:
+  learning_rate: 2.0e-4
+  num_train_epochs: 1
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+  warmup_ratio: 0.03
+  lr_scheduler_type: "cosine"
+  max_seq_length: 2048
+  output_dir: "outputs/lora_a"               # NÃO versionar

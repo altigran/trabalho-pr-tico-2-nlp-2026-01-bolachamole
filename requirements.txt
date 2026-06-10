@@ -1,0 +1,22 @@
+# ATENÇÃO: estas são versões SUGERIDAS (baseline testado em Colab T4).
+# Substitua pelos valores EXATOS do seu ambiente antes de entregar:
+#   pip freeze > requirements.txt   (e limpe o que não for usado)
+# Todas as dependências DEVEM ter versão fixada (pacote==versao).
+
+# --- Avaliação ---
+deepeval==1.5.0
+pytest==8.3.4
+
+# --- Treinamento / PEFT ---
+transformers==4.48.0
+trl==0.13.0
+peft==0.14.0
+accelerate==1.3.0
+datasets==3.2.0
+bitsandbytes==0.45.0      # necessário para QLoRA (4-bit)
+
+# --- Núcleo / utilidades ---
+torch==2.5.1              # use a build de CUDA compatível com seu ambiente (Colab)
+huggingface_hub==0.27.0
+sqlparse==0.5.3           # opcional: ajuda na extração/normalização do SQL gerado
+pyyaml==6.0.2

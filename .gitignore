@@ -1,0 +1,44 @@
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Caches Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Segredos / config local
+.env
+*.local
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Datasets (baixar localmente, NÃO versionar)
+data/spider/
+data/mmlu/
+data/**/*.json
+data/**/*.sqlite
+data/**/*.db
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Pesos / checkpoints / adapters de modelo
+checkpoints/
+outputs/
+*.bin
+*.safetensors
+*.gguf
+adapter_model*/
+lora_adapters/
+
+# Logs de treino
+runs/
+wandb/
+*.log
