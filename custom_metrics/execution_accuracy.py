@@ -2,14 +2,13 @@
 
 Esta é a ÚNICA ferramenta de avaliação da tarefa-alvo e deve ser aplicada de forma
 idêntica no baseline (Fase 2) e nos modelos fine-tuned (Fase 4).
-
-VOCÊ deve implementar a lógica abaixo. A assinatura e o contrato estão fixados pelo
-enunciado (Fase 1) — não altere a interface pública (`measure`, retorno float 1.0/0.0).
 """
 
 import re
 import sqlite3
+import sqlparse
 
+from collections import Counter
 from deepeval.metrics import BaseMetric
 from deepeval.test_case import LLMTestCase
 
@@ -22,9 +21,18 @@ def extract_sql(raw_output: str) -> str:
       - texto explicativo antes/depois da consulta;
       - prefixos como "SQL:", "Resposta:", etc.
 
-    TODO: implementar. Retornar a string SQL limpa, pronta para execução.
+    Retorna a string SQL limpa, pronta para execução.
     """
-    raise NotImplementedError
+    regex = r"```(?:sql)?\s*(.*?)\s*```"
+    output = re.search(regex, raw_output, re.DOTALL | re.IGNORECASE)
+    if (output):
+        return output.group(1).strip()
+    regex = r"SQL:\s*(.*?)"
+    output = re.search(regex, raw_output, re.DOTALL | re.IGNORECASE)
+    if (output):
+        return output.group(1).strip()
+
+    return raw_output.strip()
 
 
 class ExecutionAccuracy(BaseMetric):
@@ -47,10 +55,33 @@ class ExecutionAccuracy(BaseMetric):
         self.threshold = threshold
 
     def measure(self, test_case: LLMTestCase) -> float:
-        # TODO: implementar conforme o contrato acima.
-        # Dica: o db_id do exemplo costuma vir em test_case.additional_metadata.
-        # Lembre de fechar a conexão e de tratar exceções de sintaxe/execução.
-        raise NotImplementedError
+        db_id = test_case.additional_metadata
+        try:
+          with sqlite3.connect(self.db_root + f"/{db_id}/{db_id}.sqlite") as con:
+            cur = con.cursor()
+
+            # transforma em tuplas do sqlparse para normalizar antes de executar
+            resp_sql = sqlparse.parse(extract_sql(test_case.actual_output))
+            gaba_sql = sqlparse.parse(test_case.expected_output)
+            resposta = sqlparse.format(resp_sql, keyword_case='lower', strip_comments=True)
+            gabarito = sqlparse.format(gaba_sql, keyword_case='lower', strip_comments=True)
+
+            cur.execute(resposta)
+            res1 = cur.fetchall()
+            cur.execute(gabarito)
+            res2 = cur.fetchall()
+
+            if ("order by" not in gabarito):
+              if (Counter(res1) != Counter(res2)):
+                return 0.0
+            elif ("order by" in gabarito) and (res1 != res2):
+              return 0.0
+
+            cur.close()
+            return 1.0
+        except Exception as erro:
+          print(erro)
+        return 0.0
 
     def is_successful(self) -> bool:
         return getattr(self, "score", 0.0) >= self.threshold

@@ -8,9 +8,9 @@ Execute com:  pytest tests/
 """
 
 import os
-
+import json
 import pytest
-
+from deepeval.test_case import LLMTestCase
 from custom_metrics.execution_accuracy import ExecutionAccuracy
 
 # Ajuste conforme sua estrutura em data/ e results/
@@ -19,14 +19,23 @@ PREDICTIONS = os.environ.get("PREDICTIONS", "results/baseline/predictions.jsonl"
 
 
 def load_test_cases(predictions_path: str):
-    """TODO: ler predictions_path e devolver uma lista de LLMTestCase com:
+    """lê predictions_path e devolver uma lista de LLMTestCase com:
         - input            = pergunta (+ esquema)
         - actual_output    = saída bruta do modelo
         - expected_output  = SQL de referência (gold)
         - additional_metadata = {"db_id": ...}
     """
-    raise NotImplementedError
-
+    lista = []
+    with open(predictions_path, 'r') as arq:
+      for linha in arq:
+        item = json.loads(linha)
+        lista.append(LLMTestCase(
+          input=item["input"],
+          actual_output=item["actual_output"],
+          expected_output=item["expected_output"],
+          additional_metadata=item["db_id"]
+        ))
+    return lista
 
 @pytest.mark.parametrize("test_case", load_test_cases(PREDICTIONS) if os.path.exists(PREDICTIONS) else [])
 def test_execution_accuracy(test_case):

@@ -69,6 +69,9 @@ python scripts/build_mmlu_suite.py
 
 ## Reprodução dos resultados (preencha com seus comandos reais)
 
+Para rodar os experimentos no ambiente Kaggle utilizado, acesse o [notebook](https://www.kaggle.com/code/giovanal/nlp-tp2).
+
+Para rodar os arquivos localmente, execute os seguintes comandos:
 ```bash
 # 1. Pré-processar o Spider train para formato de chat
 python scripts/preprocess_spider.py
